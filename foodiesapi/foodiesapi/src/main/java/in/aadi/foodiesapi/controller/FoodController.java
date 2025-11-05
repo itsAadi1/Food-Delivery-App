@@ -19,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/foods")
 @AllArgsConstructor
+@CrossOrigin("*")
 public class FoodController {
     private final FoodService foodService;
     @PostMapping
@@ -54,7 +55,7 @@ public class FoodController {
             throw new RuntimeException(e);
         }
     }
-    @DeleteMapping("/{fileId}")
+    @DeleteMapping("/file/{fileId}")
     public boolean deleteFile(@PathVariable String fileId) {
         try {
             foodService.deleteFile(fileId);
