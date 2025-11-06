@@ -22,6 +22,19 @@ export const StoreContextProvider = (props) => {
         }
     })
    }
+   const removeItem = (id) => {
+    setQuantity((prev) => {
+        const newQuantity = { ...prev }
+        delete newQuantity[id]
+        return newQuantity
+    })
+   }
+   const setItemQuantity = (id, qty) => {
+    setQuantity((prev) => ({
+        ...prev,
+        [id]: Math.max(0, qty)
+    }))
+   }
    useEffect(() => {
     async function loadData() {
         try {
@@ -39,7 +52,9 @@ export const StoreContextProvider = (props) => {
         foodList,
         quantity,
         increaseQuantity,
-        decreaseQuantity
+        decreaseQuantity,
+        removeItem,
+        setItemQuantity
     };
     
     return (
