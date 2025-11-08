@@ -1,6 +1,37 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { registerUser } from '../services/UserService'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 const Register = () => {
+    const navigate = useNavigate()
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+    })
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.id]: e.target.value })
+    }
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        registerUser(formData)
+        .then(response => {
+            toast.success('Registration successful')
+            navigate('/login')
+            setFormData({ name: '', email: '', password: '' })
+        })
+        .catch(error => {
+            console.error('Error registering user:', error)
+            toast.error('Registration failed')
+            navigate('/register')
+            setFormData({ name: '', email: '', password: '' })
+        })
+    }
+    const handleReset = (e) => {
+        e.preventDefault()
+        setFormData({ name: '', email: '', password: '' })
+    }
   return (
     <>  {/* Login Form */}
     <div className="container">
@@ -9,25 +40,25 @@ const Register = () => {
           <div className="card border-0 shadow rounded-3 my-5">
             <div className="card-body p-4 p-sm-5">
               <h5 className="card-title text-center mb-5 fw-light fs-5">Sign Up</h5>
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="form-floating mb-3">
-                  <input type="text" className="form-control" id="floatingInput" placeholder="name@example.com"/>
-                  <label htmlFor="floatingInput">Name</label>
+                  <input type="text" className="form-control" id="name" placeholder="name@example.com" value={formData.name} onChange={handleChange}/>
+                  <label htmlFor="name">Name</label>
                 </div>
                 <div className="form-floating mb-3">
-                  <input type="email" className="form-control" id="floatingEmail" placeholder="name@example.com"/>
-                  <label htmlFor="floatingEmail">Email address</label>
-                </div>
+                  <input type="email" className="form-control" id="email" placeholder="name@example.com" value={formData.email} onChange={handleChange}/>
+                  <label htmlFor="email">Email address</label>
+                </div>  
                 <div className="form-floating mb-3">
-                  <input type="password" className="form-control" id="floatingPassword" placeholder="Password"/>
-                  <label htmlFor="floatingPassword">Password</label>
+                  <input type="password" className="form-control" id="password" placeholder="Password" value={formData.password} onChange={handleChange}/>
+                  <label htmlFor="password">Password</label>
                 </div>
   
                 <div className="d-grid">
                   <button className="btn btn-outline-primary text-uppercase w-100" type="submit">Sign
                     up</button>
                 </div>
-                <button className="btn btn-outline-danger text-uppercase mt-2 w-100" type="reset">Reset</button>
+                <button className="btn btn-outline-danger text-uppercase mt-2 w-100" type="reset" onClick={handleReset}>Reset</button>
                 <div className="mt-4">
                   <p>Already have an account? <Link to="/login">Sign In</Link></p>
                 </div>

@@ -19,4 +19,5 @@ const readFood = async (id) => {
         throw new Error('Failed to read food')
     }
 }
-export { readFoods, readFood }
+
+export { readFoods, readFood}
