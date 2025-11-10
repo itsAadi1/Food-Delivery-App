@@ -10,6 +10,7 @@ import Cart from './pages/Cart.jsx'
 import PlaceOrder from './pages/PlaceOrder.jsx'
 import Login from './components/Login.jsx'
 import Register from './components/Register.jsx'
+import Orders from './pages/Orders.jsx'
 function App() {
   return (  
     <>
@@ -23,6 +24,7 @@ function App() {
         <Route path='/placeorder' element={<PlaceOrder />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/orders' element={<Orders />} />
       </Routes>
     </>
   )

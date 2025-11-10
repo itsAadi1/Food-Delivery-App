@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { loginUser } from '../services/UserService.js'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { StoreContext } from '../context/StoreContext'
 const Login = () => {
+  const { setToken, setUserEmail } = useContext(StoreContext)
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
@@ -12,18 +15,32 @@ const Login = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value })
   }
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    loginUser(formData)
-    .then(response => {
-      navigate('/')
+    try {
+      const response = await loginUser(formData)
+      if (response && response.token) {
+        setToken(response.token)
+        // Store user email from response or form data
+        const emailToStore = response.email || formData.email
+        if (emailToStore && setUserEmail) {
+          setUserEmail(emailToStore)
+        }
+        if (emailToStore) {
+          localStorage.setItem('userEmail', emailToStore)
+        }
+        toast.success('Login successful')
+        navigate('/')
+      } else {
+        toast.error('Login failed: Invalid response from server')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed. Please check your credentials.'
+      toast.error(errorMessage)
+    } finally {
       setFormData({ email: '', password: '' })
-    })
-    .catch(error => {
-      console.error('Error logging in user:', error)
-      navigate('/login')
-      setFormData({ email: '', password: '' })
-    })
+    }
   }
   const handleReset = (e) => {
     e.preventDefault()
@@ -57,7 +74,7 @@ const Login = () => {
                 <button className="btn btn-outline-primary text-uppercase w-100" type="submit">Sign
                   in</button>
                 </div>
-                <button className="btn btn-outline-danger text-uppercase mt-2 w-100" type="reset" onClick={handleReset}>Reset</button>
+                <button className="btn btn-outline-danger text-uppercase mt-2 w-100" type="button" onClick={handleReset}>Reset</button>
                 <div className="mt-4">
                   <p>Don't have an account? <Link to="/register">Sign Up</Link></p>
                 </div>

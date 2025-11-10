@@ -15,7 +15,17 @@ const loginUser = async (user) => {
         return response.data
     } catch (error) {
         console.error('Error logging in user:', error)
-        throw new Error('Failed to login user')
+        if (error.response) {
+            // Server responded with error status
+            const errorMessage = error.response.data?.message || error.response.data?.error || `Login failed: ${error.response.status} ${error.response.statusText}`
+            throw new Error(errorMessage)
+        } else if (error.request) {
+            // Request was made but no response received
+            throw new Error('No response from server. Please check if the server is running.')
+        } else {
+            // Something else happened
+            throw new Error(error.message || 'Failed to login user')
+        }
     }
 }
 export { registerUser, loginUser }

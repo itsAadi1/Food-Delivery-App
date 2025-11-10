@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { StoreContext } from '../context/StoreContext'
 import { CartUtils } from '../util/CartUtils'
@@ -7,6 +7,9 @@ const Cart = () => {
   const cartItems = foodList.filter((food) => quantity[food.id] > 0)
   const { totalPrice, hasItems, totalShipping, totalTax, totalAmount } = CartUtils(cartItems, quantity)
   const navigate = useNavigate()
+
+  
+
   return (
     <>
 

@@ -4,24 +4,25 @@ import in.aadi.foodiesapi.entity.UserEntity;
 import in.aadi.foodiesapi.io.FoodRequest;
 import in.aadi.foodiesapi.io.UserRequest;
 import in.aadi.foodiesapi.io.UserResponse;
+import in.aadi.foodiesapi.repository.FoodRepository;
 import in.aadi.foodiesapi.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationFacade authenticationFacade;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
     public UserResponse registerUser(UserRequest userRequest) {
         Optional<UserEntity> isExisting=userRepository.findByEmail(userRequest.getEmail());
         if(isExisting.isPresent()) throw new RuntimeException("User already exists");
@@ -55,5 +56,11 @@ public class UserServiceImpl implements UserService {
                     .name(registeredUser.getName())
                     .email(registeredUser.getEmail())
                     .build();
+    }
+
+    public String findByUserId() {
+        String loggedInUserEmail = authenticationFacade.getAuthentication().getName();
+        UserEntity loggedInUser= userRepository.findByEmail(loggedInUserEmail).orElseThrow(()-> new UsernameNotFoundException("User not found"));
+        return loggedInUser.getId();
     }
 }

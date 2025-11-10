@@ -13,21 +13,19 @@ const Register = () => {
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value })
     }
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        registerUser(formData)
-        .then(response => {
-            toast.success('Registration successful')
-            navigate('/login')
-            setFormData({ name: '', email: '', password: '' })
-        })
-        .catch(error => {
-            console.error('Error registering user:', error)
-            toast.error('Registration failed')
-            navigate('/register')
-            setFormData({ name: '', email: '', password: '' })
-        })
-    }
+        try {
+          await registerUser(formData)
+          toast.success('Registration successful')
+          navigate('/login')
+        } catch (error) {
+          toast.error('Registration failed')
+        } finally {
+          setFormData({ name: '', email: '', password: '' })
+        }
+      }
+      
     const handleReset = (e) => {
         e.preventDefault()
         setFormData({ name: '', email: '', password: '' })

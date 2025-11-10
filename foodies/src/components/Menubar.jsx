@@ -1,13 +1,64 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState, useEffect, useRef } from 'react'
 import { assets } from '../assets/assets'
 import { Link, useNavigate } from 'react-router-dom'
 import { StoreContext } from '../context/StoreContext'
-import { useState } from 'react'
 export default function Menubar() {
+  const { token, setToken, userEmail, setUserEmail } = useContext(StoreContext)
   const [active, setActive] = useState('home')
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const {quantity} = useContext(StoreContext)
   const cartItems = Object.values(quantity).reduce((acc, curr) => acc + curr, 0)
   const navigate = useNavigate()
+  const dropdownRef = useRef(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false)
+      }
+    }
+
+    if (showProfileDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showProfileDropdown])
+
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem('token')
+      localStorage.removeItem('userEmail')
+      setToken(null)
+      if (setUserEmail) {
+        setUserEmail(null)
+      }
+      setShowProfileDropdown(false)
+      navigate('/')
+    } catch (error) {
+      console.error('Error logging out:', error)
+    }
+  }
+
+  const handleLogin = () => {
+    navigate('/login')
+  }
+
+  const handleRegister = () => {
+    navigate('/register')
+  }
+
+  const handleOrders = () => {
+    setShowProfileDropdown(false)
+    navigate('/orders')
+  }
+
+  const toggleProfileDropdown = () => {
+    setShowProfileDropdown(!showProfileDropdown)
+  }
   return (
     <>
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -40,8 +91,51 @@ export default function Menubar() {
           {cartItems}
         </span>}
       </div>
-      <button className="btn btn-outline-primary mx-2" onClick={() => navigate('/login')}>Login</button>
-      <button className="btn btn-success" onClick={() => navigate('/register')}>Register</button>
+      {token ? (
+        <div className="dropdown" ref={dropdownRef}>
+          <button 
+            className="btn btn-outline-primary dropdown-toggle mx-2" 
+            type="button" 
+            id="profileDropdown" 
+            onClick={toggleProfileDropdown}
+            aria-expanded={showProfileDropdown}
+          >
+            <i className="bi bi-person-circle me-2"></i>
+            {userEmail ? userEmail.split('@')[0] : 'Profile'}
+          </button>
+          {showProfileDropdown && (
+            <ul 
+              className="dropdown-menu dropdown-menu-end show" 
+              aria-labelledby="profileDropdown"
+              style={{ display: 'block' }}
+            >
+              <li>
+                <Link 
+                  className="dropdown-item" 
+                  to="/orders"
+                  onClick={handleOrders}
+                >
+                  <i className="bi bi-bag-check me-2"></i>Orders
+                </Link>
+              </li>
+              <li><hr className="dropdown-divider" /></li>
+              <li>
+                <button 
+                  className="dropdown-item text-danger" 
+                  onClick={handleLogout}
+                >
+                  <i className="bi bi-box-arrow-right me-2"></i>Logout
+                </button>
+              </li>
+            </ul>
+          )}
+        </div>
+      ) : (
+        <div className="d-flex align-items-center gap-2">
+          <button className="btn btn-outline-primary mx-2" onClick={handleLogin}>Login</button>
+          <button className="btn btn-success" onClick={handleRegister}>Register</button>
+        </div>
+      )}
       </div>
     </div>
   </div>

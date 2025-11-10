@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { readFood } from "../services/FoodService";
 import { StoreContext } from "../context/StoreContext";
-
+import { addToCart, removeFromCart } from "../services/CartService";
 const FoodDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const FoodDetails = () => {
   const [loading, setLoading] = useState(true);
   const [localQuantity, setLocalQuantity] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
-  const { quantity, increaseQuantity, decreaseQuantity, setItemQuantity } = useContext(StoreContext);
+  const { quantity, increaseQuantity, decreaseQuantity, setItemQuantity, loadCartItems } = useContext(StoreContext);
   
   const currentCartQuantity = quantity[data?.id] || 0;
 
@@ -43,42 +43,56 @@ const FoodDetails = () => {
     setLocalQuantity(prev => Math.max(1, prev - 1));
   };
 
-  const addToCart = () => {
+  const handleAddToCart = async () => {
     if (!data) return;
     
-    // Set the quantity directly to the local quantity
-    const currentQty = currentCartQuantity;
-    const finalQuantity = currentQty + localQuantity;
-    setItemQuantity(data.id, finalQuantity);
-    
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    try {
+      // Add items to cart (backend increments by 1 each time)
+      for (let i = 0; i < localQuantity; i++) {
+        await addToCart(data.id);
+      }
+      // Reload cart from backend to get accurate quantities
+      if (loadCartItems) {
+        await loadCartItems();
+      }
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      // Optionally show error message
+    }
   };
 
-  const updateCartQuantity = () => {
-    if (!data) return;
+  const updateCartQuantity = async () => {
+    if (!data) return;  
     
-    // Set the quantity directly to the local quantity
-    setItemQuantity(data.id, localQuantity);
-    
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  if (loading) {
-    return (
-      <section className="py-5">
-        <div className="container px-4 px-lg-5 my-5">
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
+    try {
+      const currentQty = currentCartQuantity;
+      const targetQty = localQuantity;
+      const difference = targetQty - currentQty;
+      
+      if (difference > 0) {
+        // Add items
+        for (let i = 0; i < difference; i++) {
+          await addToCart(data.id);
+        }
+      } else if (difference < 0) {
+        // Remove items
+        for (let i = 0; i < Math.abs(difference); i++) {
+          await removeFromCart(data.id);
+        }
+      }
+      // Reload cart from backend to get accurate quantities
+      if (loadCartItems) {
+        await loadCartItems();
+      }
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      // Optionally show error message
+    }
+  };  
   if (!data) {
     return (
       <section className="py-5">
@@ -213,7 +227,7 @@ const FoodDetails = () => {
               <button
                 className="btn btn-primary btn-lg flex-fill"
                 type="button"
-                onClick={currentCartQuantity > 0 ? updateCartQuantity : addToCart}
+                onClick={currentCartQuantity > 0 ? updateCartQuantity : handleAddToCart}
               >
                 <i className="bi bi-cart-fill me-2"></i>
                 {currentCartQuantity > 0 ? 'Update Cart' : 'Add to Cart'}
