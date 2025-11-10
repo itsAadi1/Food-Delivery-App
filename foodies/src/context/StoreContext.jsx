@@ -161,9 +161,11 @@ export const StoreContextProvider = (props) => {
     async function loadData() {
         try {
             const response = await readFoods()
+            console.log('Foods loaded:', response)
             setFoodList(response || [])
         } catch (error) {
             console.error('Error loading foods:', error)
+            console.error('Error details:', error.response?.data || error.message)
             setFoodList([])
         }
     }

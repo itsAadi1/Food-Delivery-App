@@ -8,10 +8,12 @@ function ListFood() {
     const [list,setList] = useState([]);
     const fetchList = async ()=>{
         try {
-            const response = await readFoods()
-            setList(response.data)
+            const data = await readFoods()
+            setList(data || [])
         } catch (error) {
             console.error('Error fetching list:', error)
+            toast.error('Failed to load food items')
+            setList([])
         }
     }
     const handleDelete = async (id)=>{

@@ -1,19 +1,51 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { StoreContext } from '../context/StoreContext'
+import { getUserOrders, deleteOrder } from '../services/OrderService'
+import { toast } from 'react-toastify'
 
 const Orders = () => {
   const { token } = useContext(StoreContext)
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const loadOrders = async () => {
+    try {
+      setLoading(true)
+      const data = await getUserOrders()
+      setOrders(data || [])
+    } catch (error) {
+      console.error('Error loading orders:', error)
+      if (error.response?.status !== 401) {
+        toast.error('Failed to load orders')
+      }
+      setOrders([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    // TODO: Fetch orders from backend API
-    // For now, we'll show a placeholder
-    setLoading(false)
-    // Simulated orders data - replace with actual API call
-    setOrders([])
+    if (token) {
+      loadOrders()
+    } else {
+      setLoading(false)
+    }
   }, [token])
+
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) {
+      return
+    }
+    try {
+      await deleteOrder(orderId)
+      toast.success('Order cancelled successfully')
+      loadOrders()
+    } catch (error) {
+      console.error('Error deleting order:', error)
+      toast.error('Failed to cancel order')
+    }
+  }
 
   if (!token) {
     return (
@@ -57,28 +89,48 @@ const Orders = () => {
                 <div key={order.id} className="col-md-6 mb-4">
                   <div className="card">
                     <div className="card-header d-flex justify-content-between align-items-center">
-                      <span className="fw-bold">Order #{order.id}</span>
-                      <span className={`badge ${
-                        order.status === 'completed' ? 'bg-success' :
-                        order.status === 'pending' ? 'bg-warning' :
-                        'bg-secondary'
-                      }`}>
-                        {order.status}
-                      </span>
+                      <span className="fw-bold">Order #{order.id?.substring(0, 8)}</span>
+                      <div className="d-flex gap-2">
+                        <span className={`badge ${
+                          order.orderStatus === 'Completed' || order.orderStatus === 'Delivered' ? 'bg-success' :
+                          order.orderStatus === 'Pending' ? 'bg-warning' :
+                          order.orderStatus === 'Cancelled' ? 'bg-danger' :
+                          'bg-secondary'
+                        }`}>
+                          {order.orderStatus || 'Pending'}
+                        </span>
+                        <span className={`badge ${
+                          order.paymentStatus === 'Paid' ? 'bg-success' : 'bg-warning'
+                        }`}>
+                          {order.paymentStatus || 'Unpaid'}
+                        </span>
+                      </div>
                     </div>
                     <div className="card-body">
                       <p className="mb-2">
-                        <strong>Date:</strong> {new Date(order.date).toLocaleDateString()}
+                        <strong>Email:</strong> {order.email || 'N/A'}
                       </p>
                       <p className="mb-2">
-                        <strong>Total:</strong> ₹{order.total.toFixed(2)}
+                        <strong>Phone:</strong> {order.phoneNumber || 'N/A'}
+                      </p>
+                      <p className="mb-2">
+                        <strong>Address:</strong> {order.userAddress || 'N/A'}
+                      </p>
+                      <p className="mb-2">
+                        <strong>Total:</strong> ₹{((order.amount || 0) / 100).toFixed(2)}
                       </p>
                       <p className="mb-3">
-                        <strong>Items:</strong> {order.items.length}
+                        <strong>Items:</strong> {order.orderedItems?.length || 0}
                       </p>
-                      <Link to={`/orders/${order.id}`} className="btn btn-sm btn-outline-primary">
-                        View Details
-                      </Link>
+                      <div className="d-flex gap-2">
+                        <button 
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => handleDeleteOrder(order.id)}
+                          disabled={order.orderStatus === 'Cancelled' || order.orderStatus === 'Delivered'}
+                        >
+                          <i className="bi bi-x-circle me-1"></i>Cancel Order
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

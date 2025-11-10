@@ -15,7 +15,7 @@ const addFood = async (food,image) => {
 const readFoods = async () => {
     try {
         const response = await axios.get(API_URL)
-        return response
+        return response.data
     } catch (error) {
         console.error('Error reading foods:', error)
         throw new Error('Failed to read foods')

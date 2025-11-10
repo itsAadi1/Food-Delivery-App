@@ -1,17 +1,23 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { StoreContext } from '../context/StoreContext'
 import { CartUtils } from '../util/CartUtils'
+import { createOrder, verifyPayment } from '../services/OrderService'
+import { clearCart } from '../services/CartService'
+import { toast } from 'react-toastify'
+
 const PlaceOrder = () => {
-  const { foodList, quantity } = useContext(StoreContext)
+  const { foodList, quantity, userEmail, loadCartItems } = useContext(StoreContext)
   const navigate = useNavigate()
   const cartItems = foodList.filter((food) => quantity[food.id] > 0)
   const { totalPrice, totalQuantity, hasItems, totalShipping, totalTax, totalAmount } = CartUtils(cartItems, quantity)
+  const [loading, setLoading] = useState(false)
 
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    email: userEmail || '',
+    phoneNumber: '',
     address: '',
     address2: '',
     country: '',
@@ -21,6 +27,13 @@ const PlaceOrder = () => {
 
   const [promoCode, setPromoCode] = useState('')
   const [appliedPromo, setAppliedPromo] = useState(null)
+
+  // Pre-fill email if user is logged in
+  useEffect(() => {
+    if (userEmail) {
+      setFormData(prev => ({ ...prev, email: userEmail }))
+    }
+  }, [userEmail])
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -37,10 +50,120 @@ const PlaceOrder = () => {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Order placed:', formData)
-    navigate('/success')
+    setLoading(true)
+    
+    try {
+      // Prepare order items from cart
+      const orderedItems = cartItems.map(food => ({
+        foodId: food.id,
+        name: food.name,
+        quantity: quantity[food.id],
+        price: food.price,
+        category: food.category,
+        imageUrl: food.imageUrl,
+        description: food.description
+      }))
+
+      // Calculate final amount (with discount if applied)
+      const finalAmount = totalAmount - (appliedPromo ? appliedPromo.discount : 0)
+      
+      // Build address string
+      const fullAddress = [
+        formData.address,
+        formData.address2,
+        formData.state,
+        formData.country,
+        formData.zip
+      ].filter(Boolean).join(', ')
+
+      // Create order request
+      const orderRequest = {
+        orderedItems: orderedItems,
+        userAddress: fullAddress,
+        amount: finalAmount * 100, // Convert to paise for Razorpay
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        orderStatus: 'Pending'
+      }
+
+      // Create order with payment
+      const orderResponse = await createOrder(orderRequest)
+      
+      if (!orderResponse.razorpayOrderId) {
+        throw new Error('Failed to create Razorpay order')
+      }
+      
+      // Initialize Razorpay payment
+      // Note: Razorpay key should be from environment variable or config
+      // For now using the key from backend config (this is a public key, safe to expose)
+      const RAZORPAY_KEY = 'aaaaaaa' // TODO: Move to environment variable
+      
+      const options = {
+        key: RAZORPAY_KEY,
+        amount: Math.round(finalAmount * 100), // Amount in paise
+        currency: 'INR',
+        name: 'Foodies',
+        description: 'Food Order Payment',
+        order_id: orderResponse.razorpayOrderId,
+        handler: async function (response) {
+          try {
+            setLoading(true)
+            // Verify payment
+            await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+            
+            // Clear cart after successful payment
+            try {
+              await clearCart()
+              if (loadCartItems) {
+                await loadCartItems()
+              }
+            } catch (error) {
+              console.error('Error clearing cart:', error)
+            }
+            
+            toast.success('Order placed successfully!')
+            navigate('/orders')
+          } catch (error) {
+            console.error('Error verifying payment:', error)
+            toast.error('Payment verification failed. Please contact support.')
+            setLoading(false)
+          }
+        },
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          email: formData.email,
+          contact: formData.phoneNumber
+        },
+        theme: {
+          color: '#3399cc'
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false)
+            toast.info('Payment cancelled')
+          }
+        }
+      }
+
+      const razorpay = new window.Razorpay(options)
+      razorpay.on('payment.failed', function (response) {
+        toast.error('Payment failed: ' + (response.error?.description || 'Unknown error'))
+        setLoading(false)
+      })
+      razorpay.open()
+      setLoading(false) // Reset loading since Razorpay modal is open
+      
+    } catch (error) {
+      console.error('Error placing order:', error)
+      toast.error(error.message || 'Failed to place order')
+      setLoading(false)
+    }
   }
 
   if (!hasItems) {
@@ -105,6 +228,22 @@ const PlaceOrder = () => {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div className="mb-3">
+              <label htmlFor="phoneNumber" className="form-label">Phone Number</label>
+              <input
+                type="tel"
+                className="form-control"
+                id="phoneNumber"
+                name="phoneNumber"
+                placeholder="Enter your phone number"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                required
               />
             </div>
 
@@ -187,8 +326,19 @@ const PlaceOrder = () => {
             <hr className="my-4" />
 
             <div className="text-end">
-            <button type="submit" className="btn btn-primary w-100 btn-lg">
-              Continue to checkout
+            <button 
+              type="submit" 
+              className="btn btn-primary w-100 btn-lg"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Processing...
+                </>
+              ) : (
+                'Continue to checkout'
+              )}
             </button>
             </div>
           </div>
