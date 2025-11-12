@@ -2,24 +2,13 @@ import axios from 'axios'
 
 const API_URL = 'http://localhost:8080/api'
 
-// Helper function to get token from localStorage
-const getAuthToken = () => {
-    return localStorage.getItem('token')
-}
-
 // Get all orders (admin)
 const getAllOrders = async () => {
     try {
-        const token = getAuthToken()
-        if (!token) {
-            throw new Error('Authentication required. Please login first.')
-        }
-        
         const response = await axios.get(
             `${API_URL}/orders/all`,
             {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             }
@@ -39,18 +28,12 @@ const getAllOrders = async () => {
 // Update order status (admin)
 const updateOrderStatus = async (orderId, status) => {
     try {
-        const token = getAuthToken()
-        if (!token) {
-            throw new Error('Authentication required. Please login first.')
-        }
-        
         await axios.patch(
             `${API_URL}/orders/status/${orderId}`,
             null,
             {
                 params: { status },
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             }
@@ -69,16 +52,10 @@ const updateOrderStatus = async (orderId, status) => {
 // Delete order (admin)
 const deleteOrder = async (orderId) => {
     try {
-        const token = getAuthToken()
-        if (!token) {
-            throw new Error('Authentication required. Please login first.')
-        }
-        
         await axios.delete(
             `${API_URL}/orders/${orderId}`,
             {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             }

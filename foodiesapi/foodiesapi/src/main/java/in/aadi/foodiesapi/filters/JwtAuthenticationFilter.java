@@ -24,6 +24,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // if(request.getRequestURI().startsWith("/api/register") || request.getRequestURI().startsWith("/api/login") || request.getRequestURI().startsWith("/api/foods") || request.getRequestURI().startsWith("/api/orders")) {
+        //     filterChain.doFilter(request, response);
+        //     return;
+        // }
         final String authHeader=request.getHeader("Authorization");
         if(StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")){
             String token=authHeader.substring(7);

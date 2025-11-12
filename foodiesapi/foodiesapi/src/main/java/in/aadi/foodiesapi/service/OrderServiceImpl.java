@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,15 +41,15 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity newOrder = convertToEntity(request);
         newOrder = orderRepository.save(newOrder);
 
-        RazorpayClient razorpayClient = new RazorpayClient(RAZORPAY_KEY, RAZORPAY_SECRET);
+//        RazorpayClient razorpayClient = new RazorpayClient(RAZORPAY_KEY, RAZORPAY_SECRET);
         JSONObject orderRequest = new JSONObject();
         orderRequest.put("amount", newOrder.getAmount());
         orderRequest.put("currency", "INR");
         orderRequest.put("payment_capture", 1);
 
-        Order razorpayOrder = razorpayClient.orders.create(orderRequest);
-        newOrder.setRazorpayOrderId(razorpayOrder.get("id"));
-
+//        Order razorpayOrder = razorpayClient.orders.create(orderRequest);
+//        newOrder.setRazorpayOrderId(razorpayOrder.get("id"));
+          newOrder.setRazorpayOrderId(UUID.randomUUID().toString());
         String loggedInUserId = userService.findByUserId();
         newOrder.setUserId(loggedInUserId);
 

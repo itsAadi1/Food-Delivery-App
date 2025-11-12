@@ -117,7 +117,7 @@ const Orders = () => {
                         <strong>Address:</strong> {order.userAddress || 'N/A'}
                       </p>
                       <p className="mb-2">
-                        <strong>Total:</strong> ₹{((order.amount || 0) / 100).toFixed(2)}
+                        <strong>Total:</strong> ₹{((order.amount || 0)).toFixed(2)}
                       </p>
                       <p className="mb-3">
                         <strong>Items:</strong> {order.orderedItems?.length || 0}

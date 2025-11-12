@@ -128,7 +128,7 @@ export default function Orders() {
                               </span>
                             </td>
                             <td>
-                              <strong className="text-success">₹{((order.amount || 0) / 100).toFixed(2)}</strong>
+                              <strong className="text-success">₹{((order.amount || 0)).toFixed(2)}</strong>
                             </td>
                             <td>
                               <select 
