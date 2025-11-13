@@ -1,6 +1,7 @@
 import {createContext, useContext, useState, useEffect, useCallback} from 'react'
 import { readFoods } from '../services/FoodService'
 import { getCartItems, addToCart, removeFromCart } from '../services/CartService'
+import {jwtDecode } from 'jwt-decode'
 export const StoreContext = createContext(null)
 
 export const StoreContextProvider = (props) => {
@@ -9,6 +10,35 @@ export const StoreContextProvider = (props) => {
    const [token, setToken] = useState(localStorage.getItem('token'))
    const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail'))
    
+   useEffect(() => {
+    if (!token) return;
+  
+    try {
+      const decoded = jwtDecode(token);
+      const expTime = decoded.exp * 1000; // exp is in seconds, convert to ms
+      const currentTime = Date.now();
+      const timeLeft = expTime - currentTime;
+  
+      if (timeLeft <= 0) {
+        // Token already expired
+        setToken(null);
+        setUserEmail(null);
+      } else {
+        // Schedule auto logout at expiry time
+            const timer = setTimeout(() => {
+          setToken(null);
+          setUserEmail(null);
+          alert('Session expired. Please log in again.');
+        }, timeLeft);
+  
+        return () => clearTimeout(timer);
+      }
+    } catch (err) {
+      console.error('Invalid token:', err);
+      setToken(null);
+      setUserEmail(null);
+    }
+  }, [token]);
    // Load token and userEmail from localStorage on mount
    useEffect(() => {
     const storedToken = localStorage.getItem('token')
