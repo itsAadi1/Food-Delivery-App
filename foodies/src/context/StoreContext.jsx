@@ -13,6 +13,7 @@ export const StoreContextProvider = (props) => {
    useEffect(() => {
     const storedToken = localStorage.getItem('token')
     const storedEmail = localStorage.getItem('userEmail')
+    
     if (storedToken) {
         setToken(storedToken)
     }
@@ -29,6 +30,7 @@ export const StoreContextProvider = (props) => {
         localStorage.removeItem('token')
         setQuantity({}) // Clear cart when logged out
     }
+    // console.log('Token:', token)
    }, [token])
    
    // Sync userEmail to localStorage whenever it changes

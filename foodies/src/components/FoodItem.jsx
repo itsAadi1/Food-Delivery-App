@@ -1,55 +1,195 @@
 import React, { useContext } from 'react'
 import { StoreContext } from '../context/StoreContext'
 import { Link, useNavigate } from 'react-router-dom'
+
 export default function FoodItem({food}) {
-    const {quantity, increaseQuantity,decreaseQuantity} = useContext(StoreContext)
+    const {quantity, increaseQuantity, decreaseQuantity} = useContext(StoreContext)
     const navigate = useNavigate()
     const navigateToDetails = () => navigate(`/food/${food.id}`)
+    
+    // Calculate discount and original price (for demo purposes)
+    const originalPrice = food.price * 1.5 // Simulate original price
+    const discountPercent = Math.round(((originalPrice - food.price) / originalPrice) * 100)
+    const rating = 3.7 // Placeholder rating
+    const reviews = 245 // Placeholder review count
+    
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
             navigateToDetails()
         }
     }
+    
+    const handleAddToCart = (e) => {
+        e.stopPropagation()
+        increaseQuantity(food.id)
+    }
+    
     return (
         <div
-            className="card h-100 shadow-sm"
+            className="card h-100 shadow-sm border-0"
             onClick={navigateToDetails}
             onKeyDown={handleKeyDown}
             role="button"
             tabIndex={0}
-            style={{cursor: 'pointer'}}
+            style={{cursor: 'pointer', overflow: 'hidden'}}
         >
-            <img
-                src={food.imageUrl}
-                className="card-img-top"
-                alt={food.name}
-                style={{height: '200px', objectFit: 'cover'}}
-            />
-            <div className="card-body d-flex flex-column">
-                <h5 className="card-title mb-2" style={{wordBreak: 'normal', overflowWrap: 'anywhere'}}>{food.name}</h5>
-                <p className="card-text text-muted mb-3" style={{minHeight: '48px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'}}>{food.description}</p>
-                <div className="mt-auto d-flex justify-content-between align-items-center">
-                    <span className="h5 mb-0">&#8377;{food.price}</span>
-                    <div className="d-flex align-items-center gap-1">
-                        <i className="bi bi-star-fill text-warning"></i>
-                        <i className="bi bi-star-fill text-warning"></i>
-                        <i className="bi bi-star-fill text-warning"></i>
-                        <i className="bi bi-star-fill text-warning"></i>
-                        <i className="bi bi-star-half text-warning"></i>
-                        <small className="text-muted">(4.5)</small>
-                    </div>
+            {/* Image with Rating Overlay */}
+            <div style={{position: 'relative'}}>
+                <img
+                    src={food.imageUrl}
+                    className="card-img-top"
+                    alt={food.name}
+                    style={{
+                        height: '250px',
+                        objectFit: 'cover',
+                        width: '100%'
+                    }}
+                />
+                {/* Rating Overlay */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        bottom: '10px',
+                        left: '10px',
+                        backgroundColor: 'white',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '0.875rem',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                >
+                    <span style={{fontWeight: '500'}}>{rating}</span>
+                    <i className="bi bi-star-fill" style={{color: '#4A90E2', fontSize: '0.75rem'}}></i>
+                    <span style={{color: '#666', fontSize: '0.75rem'}}>|</span>
+                    <span style={{color: '#666', fontSize: '0.75rem'}}>{reviews}</span>
                 </div>
             </div>
-            <div className="card-footer d-flex justify-content-between bg-light" onClick={(e) => e.stopPropagation()}>
-                <Link className="btn btn-primary btn-sm" to={`/food/${food.id}`}>View Details</Link>
-                <div className="d-flex align-items-center gap-1">
-                    <button className="btn btn-outline-secondary btn-sm" onClick={() => increaseQuantity(food.id)}>
-                        <i className="bi bi-plus-circle"></i>
-                    </button>
-                    <span className="text-muted">{quantity[food.id] || 0}</span>
-                    <button className="btn btn-outline-secondary btn-sm" onClick={() => decreaseQuantity(food.id)}>
-                        <i className="bi bi-dash-circle"></i>
+            
+            {/* Card Body */}
+            <div className="card-body d-flex flex-column p-3">
+                {/* Brand/Category */}
+                <div
+                    style={{
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        color: '#666',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                    }}
+                >
+                    {food.category || 'Food'}
+                </div>
+                
+                {/* Food Name */}
+                <h6
+                    className="mb-2"
+                    style={{
+                        fontWeight: '400',
+                        color: '#333',
+                        fontSize: '0.95rem',
+                        lineHeight: '1.4',
+                        minHeight: '40px',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                    }}
+                >
+                    {food.name}
+                </h6>
+                
+                {/* Pricing Section */}
+                <div className="mt-auto">
+                    <div className="d-flex align-items-baseline gap-2 mb-2">
+                        <span
+                            style={{
+                                fontSize: '1.1rem',
+                                fontWeight: '700',
+                                color: '#333'
+                            }}
+                        >
+                            ₹{food.price.toFixed(0)}
+                        </span>
+                        <span
+                            style={{
+                                fontSize: '0.85rem',
+                                color: '#999',
+                                textDecoration: 'line-through'
+                            }}
+                        >
+                            ₹{originalPrice.toFixed(0)}
+                        </span>
+                        <span
+                            style={{
+                                fontSize: '0.85rem',
+                                color: '#FF6B35',
+                                fontWeight: '600'
+                            }}
+                        >
+                            ({discountPercent}% OFF)
+                        </span>
+                    </div>
+                    
+                    {/* Stock Status */}
+                    <div
+                        style={{
+                            fontSize: '0.8rem',
+                            fontWeight: '600',
+                            color: '#FF6B35',
+                            marginBottom: '12px'
+                        }}
+                    >
+                        Only Few Left!
+                    </div>
+                    
+                    {/* Add to Cart Button */}
+                    <button
+                        className="btn w-100"
+                        onClick={handleAddToCart}
+                        style={{
+                            backgroundColor: '#4A90E2',
+                            color: 'white',
+                            border: 'none',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            fontWeight: '500',
+                            fontSize: '0.9rem'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#357ABD'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#4A90E2'}
+                    >
+                        {quantity[food.id] > 0 ? (
+                            <div className="d-flex align-items-center justify-content-center gap-2">
+                                <button
+                                    className="btn btn-sm p-0"
+                                    style={{color: 'white', minWidth: '24px'}}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        decreaseQuantity(food.id)
+                                    }}
+                                >
+                                    <i className="bi bi-dash-circle"></i>
+                                </button>
+                                <span>{quantity[food.id]}</span>
+                                <button
+                                    className="btn btn-sm p-0"
+                                    style={{color: 'white', minWidth: '24px'}}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        increaseQuantity(food.id)
+                                    }}
+                                >
+                                    <i className="bi bi-plus-circle"></i>
+                                </button>
+                            </div>
+                        ) : (
+                            'Add to Cart'
+                        )}
                     </button>
                 </div>
             </div>
