@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8080/api'
+const API_URL = 'https://food-delivery-app-shap.onrender.com/api'
 import axios from 'axios'
 const registerUser = async (user) => {
     try {
