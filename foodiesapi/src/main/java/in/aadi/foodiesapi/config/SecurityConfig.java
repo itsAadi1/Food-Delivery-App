@@ -57,7 +57,10 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOriginPatterns(List.of(
                 "https://food-delivery-app-buyer.vercel.app",
-                "https://food-delivery-app-seller.vercel.app"
+                "https://food-delivery-app-seller.vercel.app",
+                "https://*.vercel.app",
+                "http://localhost:*",
+                "https://food-delivery-app-shap.onrender.com"
         ));
         corsConfiguration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization","Content-Type","*"));
