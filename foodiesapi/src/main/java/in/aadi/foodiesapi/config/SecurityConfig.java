@@ -57,14 +57,9 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         // Allow common Vite dev server ports and admin panel
         corsConfiguration.setAllowedOrigins(List.of(
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "http://localhost:5175",
-            "http://localhost:3000",
-            "http://localhost:3001",
-            "http://127.0.0.1:5173",
-            "http://127.0.0.1:5174",
-            "http://127.0.0.1:5175"
+           "https://food-delivery-app-buyer.vercel.app/",
+                "https://food-delivery-app-seller.vercel.app/"
+
         ));
         corsConfiguration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization","Content-Type","*"));
