@@ -55,11 +55,9 @@ public class SecurityConfig {
     }
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        // Allow common Vite dev server ports and admin panel
-        corsConfiguration.setAllowedOrigins(List.of(
-           "https://food-delivery-app-buyer.vercel.app/",
-                "https://food-delivery-app-seller.vercel.app/"
-
+        corsConfiguration.setAllowedOriginPatterns(List.of(
+                "https://food-delivery-app-buyer.vercel.app",
+                "https://food-delivery-app-seller.vercel.app"
         ));
         corsConfiguration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization","Content-Type","*"));
