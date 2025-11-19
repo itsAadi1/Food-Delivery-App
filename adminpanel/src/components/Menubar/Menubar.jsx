@@ -1,7 +1,9 @@
 import React from 'react'
 import { assets } from '../../assets/assets'
+import { useAdminAuth } from '../../context/AdminAuthContext'
 
 export default function Menubar({toggle}) {
+  const { logout } = useAdminAuth()
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light border-bottom">
       <div className="container-fluid d-flex align-items-center">
@@ -22,6 +24,9 @@ export default function Menubar({toggle}) {
             />
             <span style={{fontWeight: 600, color: '#1e293b'}}>Admin</span>
           </div>
+          <button className="btn btn-outline-secondary" onClick={logout}>
+            Logout
+          </button>
         </div>
       </div>
     </nav>

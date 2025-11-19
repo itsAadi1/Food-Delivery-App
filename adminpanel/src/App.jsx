@@ -9,8 +9,10 @@ import Sidebar from './components/Sidebar/Sidebar.jsx'
 import Menubar from './components/Menubar/Menubar.jsx'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext.jsx'
+import Login from './pages/Login/Login.jsx'
 
-function App() {
+function AuthenticatedApp() {
  const [sidebarOpen, setSidebarOpen] = useState(true)
  const toggleSidebar = () => {
   setSidebarOpen(!sidebarOpen)
@@ -47,6 +49,34 @@ function App() {
         </div>
       </div>
     </div>
+  )
+}
+
+function AppContent() {
+  const { isAuthenticated, loading } = useAdminAuth()
+
+  if (loading) {
+    return (
+      <div className="d-flex align-items-center justify-content-center" style={{minHeight: '100vh'}}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Login />
+  }
+
+  return <AuthenticatedApp />
+}
+
+function App() {
+  return (
+    <AdminAuthProvider>
+      <AppContent />
+    </AdminAuthProvider>
   )
 }
 
