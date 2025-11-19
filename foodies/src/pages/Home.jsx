@@ -5,12 +5,13 @@ import FoodDisplay from '../components/FoodDisplay'
 
 const Home = () => {
   const [category, setCategory] = useState('All');
+  const [searchText, setSearchText] = useState('');
   
   return (
     <main className="container">
       <Header />
       <ExploreMenu category={category} setCategory={setCategory} /> 
-      <FoodDisplay category={category}/>
+      <FoodDisplay category={category} searchText={searchText}/>
     </main>
   )
 }

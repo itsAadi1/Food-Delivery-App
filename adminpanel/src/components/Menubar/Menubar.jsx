@@ -1,4 +1,5 @@
 import React from 'react'
+import { assets } from '../../assets/assets'
 
 export default function Menubar({toggle}) {
   return (
@@ -14,7 +15,11 @@ export default function Menubar({toggle}) {
         </button>
         <div className="ms-auto d-flex align-items-center gap-3">
           <div className="d-flex align-items-center gap-2">
-            <i className="bi bi-person-circle" style={{fontSize: '1.5rem', color: '#64748b'}}></i>
+            <img 
+              src={assets.profile_image} 
+              alt="profile" 
+              style={{height: '32px', width: '32px', borderRadius: '50%', objectFit: 'cover'}}
+            />
             <span style={{fontWeight: 600, color: '#1e293b'}}>Admin</span>
           </div>
         </div>

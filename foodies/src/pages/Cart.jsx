@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { StoreContext } from '../context/StoreContext'
 import { CartUtils } from '../util/CartUtils'
+import { assets } from '../assets/assets'
 const Cart = () => {
   const {foodList,quantity,increaseQuantity,decreaseQuantity,removeItem} = useContext(StoreContext)
   const cartItems = foodList.filter((food) => quantity[food.id] > 0)
@@ -40,11 +41,12 @@ const Cart = () => {
                                     <div className="col-md-2">
                                         <div className="input-group">
                                             <button 
-                                                className="btn btn-outline-secondary btn-sm" 
+                                                className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center" 
                                                 type="button"
                                                 onClick={() => decreaseQuantity(food.id)}
+                                                style={{minWidth: '32px'}}
                                             >
-                                                -
+                                                <img src={assets.remove_icon_red} alt="remove" style={{height: '16px', width: '16px'}} />
                                             </button>
                                             <input 
                                                 style={{maxWidth: '100px'}} 
@@ -54,11 +56,12 @@ const Cart = () => {
                                                 readOnly
                                             />
                                             <button 
-                                                className="btn btn-outline-secondary btn-sm" 
+                                                className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center" 
                                                 type="button"
                                                 onClick={() => increaseQuantity(food.id)}
+                                                style={{minWidth: '32px'}}
                                             >
-                                                +
+                                                <img src={assets.add_icon_green} alt="add" style={{height: '16px', width: '16px'}} />
                                             </button>
                                         </div>
                                     </div>

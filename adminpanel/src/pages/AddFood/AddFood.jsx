@@ -43,9 +43,9 @@ export default function AddFood() {
                 <div className="mb-4">
                   <label htmlFor="image" className="image-upload-label">
                     <img 
-                      src={image ? URL.createObjectURL(image) : assets.upload} 
+                      src={image ? URL.createObjectURL(image) : assets.upload_area} 
                       alt="upload" 
-                      style={{height: '64px', width: '64px', objectFit: 'cover'}}
+                      style={{height: '120px', width: '120px', objectFit: 'cover', cursor: 'pointer'}}
                     />
                     <span>{image ? 'Change Image' : 'Click to Upload Image'}</span>
                   </label>

@@ -8,7 +8,7 @@ import { clearCart } from '../services/CartService'
 import { toast } from 'react-toastify'
 
 const PlaceOrder = () => {
-  const { foodList, quantity, userEmail, loadCartItems } = useContext(StoreContext)
+  const { foodList, quantity, userEmail, loadCartItems, token } = useContext(StoreContext)
   const navigate = useNavigate()
   const cartItems = foodList.filter((food) => quantity[food.id] > 0)
   const { totalPrice, totalQuantity, hasItems, totalShipping, totalTax, totalAmount } = CartUtils(cartItems, quantity)
@@ -194,6 +194,18 @@ const PlaceOrder = () => {
       toast.error(error.message || 'Failed to place order')
       setLoading(false)
     }
+  }
+
+  if (!token) {
+    return (
+      <div className="container py-5 text-center">
+        <h3 className="mb-3">Login Required</h3>
+        <p className="text-muted mb-4">Please sign in to proceed to checkout. Your cart items will be waiting for you.</p>
+        <Link to="/login" className="btn btn-primary px-4">
+          Go to Login
+        </Link>
+      </div>
+    )
   }
 
   if (!hasItems) {

@@ -1,5 +1,6 @@
 import React from 'react'
 import { useState } from 'react'
+import { assets } from '../assets/assets'
 const ContactUs = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -36,6 +37,21 @@ const ContactUs = () => {
                     </div>
                     <div className="d-grid"><button className="btn btn-primary btn-xl" type="submit">Submit</button></div>
                 </form>
+            </div>
+        </div>
+        <div className="row gx-4 gx-lg-5 justify-content-center">
+            <div className="col-lg-8 text-center">
+                <div className="d-flex justify-content-center gap-3 mt-4">
+                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="text-decoration-none">
+                        <img src={assets.facebook_icon} alt="Facebook" style={{height: '40px', width: '40px'}} />
+                    </a>
+                    <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" className="text-decoration-none">
+                        <img src={assets.twitter_icon} alt="Twitter" style={{height: '40px', width: '40px'}} />
+                    </a>
+                    <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="text-decoration-none">
+                        <img src={assets.linkedin_icon} alt="LinkedIn" style={{height: '40px', width: '40px'}} />
+                    </a>
+                </div>
             </div>
         </div>
     </div>

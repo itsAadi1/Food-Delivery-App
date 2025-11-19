@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { StoreContext } from '../context/StoreContext'
 import { Link, useNavigate } from 'react-router-dom'
+import { assets } from '../assets/assets'
 
 export default function FoodItem({food}) {
     const {quantity, increaseQuantity, decreaseQuantity} = useContext(StoreContext)
@@ -63,7 +64,7 @@ export default function FoodItem({food}) {
                     }}
                 >
                     <span style={{fontWeight: '500'}}>{rating}</span>
-                    <i className="bi bi-star-fill" style={{color: '#4A90E2', fontSize: '0.75rem'}}></i>
+                    <img src={assets.rating_starts} alt="rating" style={{height: '12px', width: '60px', objectFit: 'contain'}} />
                     <span style={{color: '#666', fontSize: '0.75rem'}}>|</span>
                     <span style={{color: '#666', fontSize: '0.75rem'}}>{reviews}</span>
                 </div>
@@ -173,7 +174,7 @@ export default function FoodItem({food}) {
                                         decreaseQuantity(food.id)
                                     }}
                                 >
-                                    <i className="bi bi-dash-circle"></i>
+                                    <img src={assets.remove_icon_red} alt="remove" style={{height: '20px', width: '20px', filter: 'brightness(0) invert(1)'}} />
                                 </button>
                                 <span>{quantity[food.id]}</span>
                                 <button
@@ -184,11 +185,14 @@ export default function FoodItem({food}) {
                                         increaseQuantity(food.id)
                                     }}
                                 >
-                                    <i className="bi bi-plus-circle"></i>
+                                    <img src={assets.add_icon_white} alt="add" style={{height: '20px', width: '20px'}} />
                                 </button>
                             </div>
                         ) : (
-                            'Add to Cart'
+                            <div className="d-flex align-items-center justify-content-center gap-2">
+                                <img src={assets.add_icon_green} alt="add" style={{height: '20px', width: '20px'}} />
+                                <span>Add to Cart</span>
+                            </div>
                         )}
                     </button>
                 </div>

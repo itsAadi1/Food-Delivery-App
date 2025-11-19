@@ -61,11 +61,10 @@ export default function Menubar() {
   }
   return (
     <>
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
   <div className="container">
-    <Link className="navbar-brand d-flex align-items-center" to="/">
-        <img src={assets.logo} alt="logo" height={40} width={40}/>
-        <span className="ms-2">Foodies</span>
+    <Link className="navbar-brand fw-bold" to="/" style={{fontSize: '1.75rem', color: '#FF6B35', letterSpacing: '1px'}}>
+        Foodies
     </Link>
     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span className="navbar-toggler-icon"></span>
@@ -73,21 +72,26 @@ export default function Menubar() {
     <div className="collapse navbar-collapse" id="navbarSupportedContent">
       <ul className="navbar-nav me-auto mb-2 mb-lg-0 d-flex align-items-center">
         <li className="nav-item">
-          <Link className={`nav-link ${active === 'home' ? 'fw-bold' : ''}`} aria-current="page" to="/" onClick={() => setActive('home')}>Home</Link>
+          <Link className={`nav-link ${active === 'home' ? 'fw-bold text-primary' : ''}`} aria-current="page" to="/" onClick={() => setActive('home')}>home</Link>
         </li>
         <li className="nav-item">
-          <Link className={`nav-link ${active === 'explore' ? 'fw-bold' : ''}`} to="/explorefood" onClick={() => setActive('explore')}>Explore</Link>
+          <Link className={`nav-link ${active === 'explore' ? 'fw-bold text-primary' : ''}`} to="/explorefood" onClick={() => setActive('explore')}>menu</Link>
         </li>
         <li className="nav-item">
-          <Link className={`nav-link ${active === 'contact' ? 'fw-bold' : ''}`} to="/contactus" onClick={() => setActive('contact')}>Contact Us</Link>
+          <Link className={`nav-link ${active === 'contact' ? 'fw-bold text-primary' : ''}`} to="/contactus" onClick={() => setActive('contact')}>contact us</Link>
         </li>
       </ul>
-      <div className="d-flex align-items-center gap-2">
+      <div className="d-flex align-items-center gap-3">
       <div className="position-relative d-flex align-items-center">
-        <Link className={`nav-link ${active === 'cart' ? 'active' : ''}`} to="/cart" onClick={() => setActive('cart')}>
-          <img src={assets.cart} alt="cart" height={30} width={30}/>
+        <Link className={`nav-link ${active === 'search' ? 'active' : ''}`} to="/explorefood" onClick={() => setActive('search')} style={{padding: '8px'}}>
+          <img src={assets.search_icon} alt="search" height={24} width={24} style={{opacity: 0.7}}/>
         </Link>
-        {cartItems > 0 && <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+      </div>
+      <div className="position-relative d-flex align-items-center">
+        <Link className={`nav-link ${active === 'cart' ? 'active' : ''}`} to="/cart" onClick={() => setActive('cart')} style={{padding: '8px'}}>
+          <img src={assets.cart} alt="cart" height={24} width={24} style={{opacity: 0.7}}/>
+        </Link>
+        {cartItems > 0 && <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.7rem', padding: '2px 6px'}}>
           {cartItems}
         </span>}
       </div>
@@ -100,7 +104,7 @@ export default function Menubar() {
             onClick={toggleProfileDropdown}
             aria-expanded={showProfileDropdown}
           >
-            <i className="bi bi-person-circle me-2"></i>
+            <img src={assets.profile_icon} alt="profile" style={{height: '20px', width: '20px', marginRight: '8px'}} />
             {userEmail ? userEmail.split('@')[0] : 'Profile'}
           </button>
           {showProfileDropdown && (
@@ -115,7 +119,8 @@ export default function Menubar() {
                   to="/orders"
                   onClick={handleOrders}
                 >
-                  <i className="bi bi-bag-check me-2"></i>Orders
+                  <img src={assets.bag_icon} alt="orders" style={{height: '18px', width: '18px', marginRight: '8px'}} />
+                  Orders
                 </Link>
               </li>
               <li><hr className="dropdown-divider" /></li>
@@ -124,17 +129,21 @@ export default function Menubar() {
                   className="dropdown-item text-danger" 
                   onClick={handleLogout}
                 >
-                  <i className="bi bi-box-arrow-right me-2"></i>Logout
+                  <img src={assets.logout_icon} alt="logout" style={{height: '18px', width: '18px', marginRight: '8px'}} />
+                  Logout
                 </button>
               </li>
             </ul>
           )}
         </div>
       ) : (
-        <div className="d-flex align-items-center gap-2">
-          <button className="btn btn-outline-primary mx-2" onClick={handleLogin}>Login</button>
-          <button className="btn btn-success" onClick={handleRegister}>Register</button>
-        </div>
+        <button className="btn btn-outline-primary" onClick={handleLogin} style={{
+          borderRadius: '50px',
+          padding: '8px 24px',
+          fontWeight: '500'
+        }}>
+          sign in
+        </button>
       )}
       </div>
     </div>

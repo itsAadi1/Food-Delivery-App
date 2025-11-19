@@ -4,6 +4,7 @@ import AddFood from './pages/AddFood/AddFood.jsx'
 import { Routes, Route } from 'react-router-dom'
 import ListFood from './pages/ListFood/ListFood.jsx'
 import Orders from './pages/Orders/Orders.jsx'
+import BulkImport from './pages/BulkImport/BulkImport.jsx'
 import Sidebar from './components/Sidebar/Sidebar.jsx'
 import Menubar from './components/Menubar/Menubar.jsx'
 import { ToastContainer } from 'react-toastify'
@@ -40,6 +41,7 @@ function App() {
             <Route path='/addfood' element={<AddFood/>}/>
             <Route path='/listfood' element={<ListFood/>}/>
             <Route path='/orders' element={<Orders/>}/>
+            <Route path='/bulkimport' element={<BulkImport/>}/>
             <Route path='/' element={<ListFood/>}/>
           </Routes>
         </div>

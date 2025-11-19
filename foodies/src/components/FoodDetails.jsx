@@ -3,11 +3,13 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { readFood } from "../services/FoodService";
 import { StoreContext } from "../context/StoreContext";
 import { addToCart, removeFromCart } from "../services/CartService";
+import { assets } from "../assets/assets";
 const FoodDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [localQuantity, setLocalQuantity] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
   const { quantity, increaseQuantity, decreaseQuantity, setItemQuantity, loadCartItems } = useContext(StoreContext);
@@ -23,6 +25,8 @@ const FoodDetails = () => {
         setLocalQuantity(quantity[response?.id] || 1);
       } catch (error) {
         console.error('Error fetching food details:', error);
+        setError(error?.response?.data?.message || 'Food item not found')
+        setData(null)
       } finally {
         setLoading(false);
       }
@@ -93,12 +97,28 @@ const FoodDetails = () => {
       // Optionally show error message
     }
   };  
-  if (!data) {
+  if (loading) {
+    return (
+      <section className="py-5">
+        <div className="container px-4 px-lg-5 my-5">
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary mb-3" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="text-muted mb-0">Loading food details...</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (!data && !loading) {
     return (
       <section className="py-5">
         <div className="container px-4 px-lg-5 my-5">
           <div className="text-center py-5">
             <h2 className="mb-3">Food Item Not Found</h2>
+            {error && <p className="text-muted">{error}</p>}
             <Link to="/explorefood" className="btn btn-primary">
               <i className="bi bi-arrow-left me-2"></i>Back to Explore
             </Link>
@@ -156,13 +176,7 @@ const FoodDetails = () => {
             {/* Rating */}
             <div className="mb-3">
               <div className="d-flex align-items-center gap-2 mb-2">
-                <div>
-                  <i className="bi bi-star-fill text-warning"></i>
-                  <i className="bi bi-star-fill text-warning"></i>
-                  <i className="bi bi-star-fill text-warning"></i>
-                  <i className="bi bi-star-fill text-warning"></i>
-                  <i className="bi bi-star-half text-warning"></i>
-                </div>
+                <img src={assets.rating_starts} alt="rating" style={{height: '20px', width: '100px', objectFit: 'contain'}} />
                 <span className="text-muted">(4.5)</span>
               </div>
             </div>
@@ -186,12 +200,13 @@ const FoodDetails = () => {
               <div className="d-flex align-items-center gap-3 mb-3">
                 <div className="input-group" style={{ maxWidth: '150px' }}>
                   <button
-                    className="btn btn-outline-secondary"
+                    className="btn btn-outline-secondary d-flex align-items-center justify-content-center"
                     type="button"
                     onClick={handleDecreaseQuantity}
                     disabled={localQuantity <= 1}
+                    style={{minWidth: '40px'}}
                   >
-                    <i className="bi bi-dash"></i>
+                    <img src={assets.remove_icon_red} alt="remove" style={{height: '18px', width: '18px'}} />
                   </button>
                   <input
                     className="form-control text-center"
@@ -202,11 +217,12 @@ const FoodDetails = () => {
                     style={{ maxWidth: '80px' }}
                   />
                   <button
-                    className="btn btn-outline-secondary"
+                    className="btn btn-outline-secondary d-flex align-items-center justify-content-center"
                     type="button"
                     onClick={handleIncreaseQuantity}
+                    style={{minWidth: '40px'}}
                   >
-                    <i className="bi bi-plus"></i>
+                    <img src={assets.add_icon_green} alt="add" style={{height: '18px', width: '18px'}} />
                   </button>
                 </div>
                 <div className="text-muted">

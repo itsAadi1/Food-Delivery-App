@@ -4,9 +4,39 @@ import { getCartItems, addToCart, removeFromCart } from '../services/CartService
 import {jwtDecode } from 'jwt-decode'
 export const StoreContext = createContext(null)
 
+const GUEST_CART_KEY = 'foodies_guest_cart'
+
+const loadGuestCartFromStorage = () => {
+    try {
+        const stored = localStorage.getItem(GUEST_CART_KEY)
+        return stored ? JSON.parse(stored) : {}
+    } catch (error) {
+        console.error('Error parsing guest cart from storage:', error)
+        return {}
+    }
+}
+
+const saveGuestCartToStorage = (cart) => {
+    try {
+        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(cart || {}))
+    } catch (error) {
+        console.error('Error saving guest cart:', error)
+    }
+}
+
+const clearGuestCartFromStorage = () => {
+    localStorage.removeItem(GUEST_CART_KEY)
+}
+
 export const StoreContextProvider = (props) => {
    const [foodList, setFoodList] = useState([]);
-   const [quantity, setQuantity] = useState({});
+   const [quantity, setQuantity] = useState(() => {
+    const storedToken = localStorage.getItem('token')
+    if (!storedToken) {
+        return loadGuestCartFromStorage()
+    }
+    return {}
+   });
    const [token, setToken] = useState(localStorage.getItem('token'))
    const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail'))
    
@@ -58,7 +88,7 @@ export const StoreContextProvider = (props) => {
         localStorage.setItem('token', token)
     } else {
         localStorage.removeItem('token')
-        setQuantity({}) // Clear cart when logged out
+        setQuantity(loadGuestCartFromStorage()) // Restore guest cart when logged out
     }
     // console.log('Token:', token)
    }, [token])
@@ -77,7 +107,7 @@ export const StoreContextProvider = (props) => {
     try {
         const currentToken = localStorage.getItem('token')
         if (!currentToken) {
-            setQuantity({})
+            setQuantity(loadGuestCartFromStorage())
             return
         }
         const response = await getCartItems()
@@ -88,26 +118,53 @@ export const StoreContextProvider = (props) => {
         console.error('Error loading cart items:', error)
         // If unauthorized, clear cart
         if (error.response?.status === 401) {
-            setQuantity({})
+            setQuantity(loadGuestCartFromStorage())
         }
     }
    }, [])
    
-   // Load cart when token changes
-   useEffect(() => {
-    if (token) {
-        loadCartItems()
-    } else {
-        setQuantity({})
+   const mergeGuestCartWithBackend = useCallback(async () => {
+    if (!token) return
+    const guestCart = loadGuestCartFromStorage()
+    const entries = Object.entries(guestCart || {})
+    if (entries.length === 0) return
+    try {
+        for (const [foodId, qty] of entries) {
+            for (let i = 0; i < qty; i++) {
+                await addToCart(foodId)
+            }
+        }
+        clearGuestCartFromStorage()
+    } catch (error) {
+        console.error('Error merging guest cart:', error)
     }
-   }, [token, loadCartItems])
+   }, [token])
+
+   // Handle token changes (load guest cart or merge with backend)
+   useEffect(() => {
+    const handleTokenChange = async () => {
+        if (token) {
+            await mergeGuestCartWithBackend()
+            await loadCartItems()
+        } else {
+            setQuantity(loadGuestCartFromStorage())
+        }
+    }
+    handleTokenChange()
+   }, [token, loadCartItems, mergeGuestCartWithBackend])
    
    const increaseQuantity = async (id) => {
     // Optimistic update
-    setQuantity((prev) => ({
-        ...prev,
-        [id]: (prev[id] || 0) + 1
-    }))
+    setQuantity((prev) => {
+        const updated = {
+            ...prev,
+            [id]: (prev[id] || 0) + 1
+        }
+        if (!token) {
+            saveGuestCartToStorage(updated)
+        }
+        return updated
+    })
     // Sync with backend
     try {
         const token = localStorage.getItem('token')
@@ -129,16 +186,23 @@ export const StoreContextProvider = (props) => {
     
     // Optimistic update
     setQuantity((prev) => {
-        const next = Math.max(0, current - 1)
-        if (next === 0) {
+        const nextValue = Math.max(0, (prev[id] || 0) - 1)
+        if (nextValue === 0) {
             const newQuantity = { ...prev }
             delete newQuantity[id]
+            if (!token) {
+                saveGuestCartToStorage(newQuantity)
+            }
             return newQuantity
         }
-        return {
+        const updated = {
             ...prev,
-            [id]: next
+            [id]: nextValue
         }
+        if (!token) {
+            saveGuestCartToStorage(updated)
+        }
+        return updated
     })
     // Sync with backend
     try {
@@ -163,6 +227,9 @@ export const StoreContextProvider = (props) => {
     setQuantity((prev) => {
         const newQuantity = { ...prev }
         delete newQuantity[id]
+        if (!token) {
+            saveGuestCartToStorage(newQuantity)
+        }
         return newQuantity
     })
     // Sync with backend - remove all quantities
@@ -183,10 +250,16 @@ export const StoreContextProvider = (props) => {
     }
    }
    const setItemQuantity = (id, qty) => {
-    setQuantity((prev) => ({
-        ...prev,
-        [id]: Math.max(0, qty)
-    }))
+    setQuantity((prev) => {
+        const updated = {
+            ...prev,
+            [id]: Math.max(0, qty)
+        }
+        if (!token) {
+            saveGuestCartToStorage(updated)
+        }
+        return updated
+    })
    }
    
    useEffect(() => {
@@ -216,6 +289,7 @@ export const StoreContextProvider = (props) => {
         userEmail,
         setUserEmail,
         loadCartItems,
+        mergeGuestCartWithBackend,
     };
     
     return (
