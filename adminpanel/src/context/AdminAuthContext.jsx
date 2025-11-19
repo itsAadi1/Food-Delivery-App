@@ -61,7 +61,7 @@ export const AdminAuthProvider = ({ children }) => {
     const expectedPassword = import.meta.env.VITE_ADMIN_PASSWORD
 
     if (!expectedUsername || !expectedPassword) {
-      throw new Error('Admin credentials are not configured. Please set VITE_ADMIN_USERNAME and VITE_ADMIN_PASSWORD.')
+      throw new Error('Admin credentials are not configured. Please set ADMIN_USERNAME and ADMIN_PASSWORD.')
     }
 
     if (username === expectedUsername && password === expectedPassword) {
